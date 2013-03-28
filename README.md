@@ -23,7 +23,8 @@ var objectCert = {
 var sender = new (require('./iOSSender')).SenderApns(objectCert, true);
 ```
 
-In certData comes certificate in string format and in keyData private key.   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                               For using development mode use false as second argument.
+In certData comes certificate in string format and in keyData private key.
+For using development mode use false as second argument.
 
 ### 2) Send notifications
 
