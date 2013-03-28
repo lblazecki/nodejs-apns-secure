@@ -25,8 +25,7 @@ In certData comes certificate in string format and in keyData private key.   &nb
 
 ### 2) Send notifications
 
-
-var tokens = ["32 length token", "32 length token"];
+```var tokens = ["32 length token", "32 length token"];
 var apnsMessage1 = {
          expiry : 0,
          _id : "1asd1231"
@@ -41,7 +40,7 @@ apnsMessage1.payload = apnsMessage2.payload = {
 sender.sendThroughApns([apnsMessage1, apnsMessage2], tokens,
          function Success (array) { console.log(array); },
          function (error) { console.log(error); }
-);
+); ```
 
 In tokens array come array of tokens in string.                
 Messages for sending is array of JSON containing &nbsp; _id, expiry and payload.   
