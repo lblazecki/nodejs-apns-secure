@@ -26,23 +26,22 @@ In certData comes certificate in string format and in keyData private key.   &nb
 ### 2) Send notifications
 
 
-```var tokens = ["32 length token", "32 length token"];    
-var apnsMessage1 = { ```                                                                                                                   
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;```expiry :  0,```   
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;```_id : "1asd1231"```  
-```};  
-var apnsMessage2 = { ```                                                                                                                   
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;```expiry :  0,```   
-   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;```_id : "1asd1231"```  
-```};  
-apnsMessage1.payload = apnsMessage2.payload = {```   
-    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``` 'aps': 
-    {"badge" : "123", "alert" : "Test it bulk", "sound" : "default"}```  
-```  };     
-sender.sendThroughApns([apnsMessage1, apnsMessage2], tokens,```           
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;``` function Success (array) { console.log(array); },```   
-&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;```    function (error) { console.log(error); }   
-);```
+var tokens = ["32 length token", "32 length token"];
+var apnsMessage1 = {
+         expiry : 0,
+         _id : "1asd1231"
+};
+var apnsMessage2 = {
+         expiry : 0,
+         _id : "1asd1231"
+};
+apnsMessage1.payload = apnsMessage2.payload = {
+         'aps': {"badge" : "123", "alert" : "Test it bulk", "sound" : "default"}
+};
+sender.sendThroughApns([apnsMessage1, apnsMessage2], tokens,
+         function Success (array) { console.log(array); },
+         function (error) { console.log(error); }
+);
 
 In tokens array come array of tokens in string.                
 Messages for sending is array of JSON containing &nbsp; _id, expiry and payload.   
