@@ -99,7 +99,7 @@ SenderApns.prototype.errorResponse = function (data) {
             if (index < identifier) {
                 self.resultArray.push({token : token, status : 0, _id : self.notifications[index]._id});
             }
-            if (index === identifier) {
+            if (index === identifier && self.tokens.length !== identifier + 1) {
                 self.resultArray.push({token : token, status : apnsError,  _id : self.notifications[index]._id});
             }
         });
