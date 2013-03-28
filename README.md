@@ -1,4 +1,5 @@
-nodejs-apns
-===========
+=======
+nodejs-apns-secure
+==================
 
-First fully useable library for using apns
+New reliable nodejs library for sending notifications via apns
