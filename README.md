@@ -13,19 +13,22 @@ Because of current modules that are slow and unreliable I needed to make a new o
 
 ### 1) Create new object with certificates
 
-```var certData = "-----BEGIN CERTIFICATE...END CERTIFICATE-----";    
+```
+var certData = "-----BEGIN CERTIFICATE...END CERTIFICATE-----";
 var keyData =  "-----BEGIN RSAPRIVATE KEY...END RSA PRIVATE KEY-----";  
 var objectCert = {
     certData : certData,
     keyData : keyData
 };   
-var sender = new (require('./iOSSender')).SenderApns(objectCert, true);```
+var sender = new (require('./iOSSender')).SenderApns(objectCert, true);
+```
 
 In certData comes certificate in string format and in keyData private key.   &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;                                               For using development mode use false as second argument.
 
 ### 2) Send notifications
 
-```var tokens = ["32 length token", "32 length token"];
+```
+var tokens = ["32 length token", "32 length token"];
 var apnsMessage1 = {
          expiry : 0,
          _id : "1asd1231"
@@ -40,7 +43,8 @@ apnsMessage1.payload = apnsMessage2.payload = {
 sender.sendThroughApns([apnsMessage1, apnsMessage2], tokens,
          function Success (array) { console.log(array); },
          function (error) { console.log(error); }
-); ```
+);
+```
 
 In tokens array come array of tokens in string.                
 Messages for sending is array of JSON containing &nbsp; _id, expiry and payload.   
@@ -54,5 +58,6 @@ You can custom payload as you but remeber to set aps.alert for displaying messag
     _id: '1asd1231' },   
   { token: '2.token',
     status: 8,
-    _id: '1asd1231' }]```      
+    _id: '1asd1231' }]
+```
 Status is given from apns and _id from incomming notification. 0 is for success.
