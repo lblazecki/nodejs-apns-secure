@@ -4,7 +4,7 @@ nodejs-apns-secure
 New reliable nodejs module for sending notifications via apns.
 Main advantages :
 
-* 1. reliable in time <b>status report</b>
+* first reliable module with in time <b>status report</b>
 * <b>faster</b> than any other apns module
 * robust
 * bulk messages
