@@ -21,7 +21,7 @@ var objectCert = {
     certData : certData,
     keyData : keyData
 };   
-var sender = new (require('./iOSSender')).SenderApns(objectCert, true);
+var sender = new (require('./index')).SenderApns(objectCert, true);
 ```
 
 Enter certificate in “certData” and private key in “keyData”. If using development mode use “false” as second argument.
