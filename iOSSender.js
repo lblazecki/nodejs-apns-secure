@@ -16,7 +16,6 @@ function SenderApns(objectCert, production) {
     if (!production) {
         this.host = 'gateway.sandbox.push.apple.com';
     }
-
 }
 
 SenderApns.prototype.sendThroughApns = function (notifications, tokens, callsuccess, callerror) {
@@ -26,7 +25,7 @@ SenderApns.prototype.sendThroughApns = function (notifications, tokens, callsucc
     self.tokens = tokens;
     self.callsuccess = callsuccess;
     self.callerror = callerror;
-    if (!this.isInputValid()) {
+    if (!self.isInputValid()) {
         return;
     }
 
@@ -82,10 +81,7 @@ SenderApns.prototype.newConnection = function (callsuccess) {
 
     tlsStream.on("data", function (data) {
         self.errorResponse(data);
-    });
-
-    //tlsStream.on("close", function () { console.log("close"); });
-    //tlsStream.on("end", function () { console.log("end"); });
+    });;
 };
 
 SenderApns.prototype.errorResponse = function (data) {
@@ -113,13 +109,19 @@ SenderApns.prototype.errorResponse = function (data) {
         var tokens = self.tokens.slice(identifier + 1);
         var notifications = self.notifications.slice(identifier + 1);
         self.reSendThroughApns(notifications, tokens);
+        return;
     }
+    self.reSendThroughApns(notifications, tokens);
 };
 
 SenderApns.prototype.reconnect = function () {
 
     var self = this;
     self.reconnectTry += 1;
+    if (self.reconnectTry >= 10) {
+        self.callerror("Error in connecting with APNS");
+        return;
+    }
     setTimeout(function () {
         self.reSendThroughApns(self.notifications, self.tokens);
     }, 1000 * self.reconnectTry * self.reconnectTry);
@@ -127,40 +129,49 @@ SenderApns.prototype.reconnect = function () {
 
 SenderApns.prototype.isInputValid = function () {
 
-    var isValid = true;
-    if (typeof (this.callerror) !== 'function' || typeof (this.callsuccess) !== 'function') {
+    var self = this;
+    if (typeof (self.callerror) !== 'function' || typeof (self.callsuccess) !== 'function') {
         return false;
     }
-    if (!this.objectCert || !this.objectCert.certData || !this.objectCert.keyData) {
-        this.callerror("Object cert is not valid!");
+    if (!self.objectCert || !self.objectCert.certData || !self.objectCert.keyData) {
+        self.callerror("Object cert is not valid!");
         return false;
     }
-    if (!this.notifications || !this.tokens || this.tokens.length !== this.notifications.length) {
-        this.callerror("Notifications or tokens are not valid or not the same length!");
+    if (!self.notifications || !self.tokens || self.tokens.length !== self.notifications.length) {
+        self.callerror("Notifications or tokens are not valid or not the same length!");
         return false;
     }
-    _.each(this.notifications, function (notification) {
+
+    var numberNotDeleted = 0;
+    _.each(_.clone(self.notifications), function (notification, index) {
         if (!notification || !notification.payload || !notification._id || isNaN(notification.expiry)) {
-            isValid = false;
+            manageFalseInput(self, index - numberNotDeleted, 9);
+            numberNotDeleted += 1;
+            return;
+        }
+        if (JSON.stringify(notification.payload).length > 256) {
+            manageFalseInput(self, index - numberNotDeleted, 7);
+            numberNotDeleted += 1;
         }
     });
-    if (!isValid) {
-        this.callerror("Some notification is not valid!");
-        return false;
-    }
-    _.each(this.tokens, function (token) {
+
+    var numberTokDeleted = 0;
+    _.each(_.clone(self.tokens), function (token, index) {
         try {
             var tempToken =  new Buffer(token.replace(/\s/g, ""), "hex");
         } catch (error) {
-            isValid = false;
+            manageFalseInput(self, index - numberTokDeleted, 8);
+            numberTokDeleted += 1;
             return;
         }
         if (tempToken.length !== 32) {
-            isValid = false;
+            manageFalseInput(self, index - numberTokDeleted, 8);
+            numberTokDeleted += 1;
         }
     });
-    if (!isValid) {
-        this.callerror("Some token is not valid!");
+
+    if (self.notifications.length === 0) {
+        self.callsuccess(self.resultArray);
         return false;
     }
 
@@ -198,6 +209,12 @@ function makeApnsMessage(token, identifier, notification) {
     //Payload
     apnsMessage.write(message, position, encoding);
     return apnsMessage;
+}
+
+function manageFalseInput(self, index, status) {
+    self.resultArray.push({token : self.tokens[index], status : status,  _id : self.notifications[index]._id});
+    self.tokens.splice(index, 1);
+    self.notifications.splice(index, 1);
 }
 
 exports.SenderApns   = SenderApns;
