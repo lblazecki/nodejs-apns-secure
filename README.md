@@ -4,12 +4,13 @@ nodejs-apns-secure
 New reliable nodejs module for sending notifications via apns.   
 Main advanatages : 
 
+* 1. reliable in time <b>status report</b>
+* <b>faster</b> than any other apns module
 * robust
 * bulk messages
-* status report
-* simple to use
 
-Because of current modules that are slow and unreliable I needed to make a new one. After testing and putting this this module in production I wanted to share this module. Using this module is very simple :
+Because of current modules that are slow and unreliable I needed to make a new one. After testing and putting this this module in production I wanted to share this module.
+Using this module is very simple :
 
 ### 1) Create new object with certificates
 
@@ -26,10 +27,9 @@ var sender = new (require('./iOSSender')).SenderApns(objectCert, true);
 In certData comes certificate in string format and in keyData private key.
 For using development mode use false as second argument.
 
-### 2) Send notifications
+### 2) Create notifications and tokens
 
 ```
-var tokens = ["32 length token", "32 length token"];
 var apnsMessage1 = {
          expiry : 0,
          _id : "1asd1231"
@@ -41,18 +41,32 @@ var apnsMessage2 = {
 apnsMessage1.payload = apnsMessage2.payload = {
          'aps': {"badge" : "123", "alert" : "Test it bulk", "sound" : "default"}
 };
-sender.sendThroughApns([apnsMessage1, apnsMessage2], tokens,
-         function Success (array) { console.log(array); },
+var tokens = ["32 length token", "32 length token"];
+var apnsMessages = [apnsMessage1, apnsMessage1];
+```
+
+### 3) Send notificationsa nd receive result status report
+
+```
+sender.sendThroughApns(apnsMessages, tokens,
+         function Success (resultStatusArray) { console.log(resultStatusArray); },
          function (error) { console.log(error); }
 );
 ```
 
-In tokens array come array of tokens in string.                
-Messages for sending is array of JSON containing &nbsp; _id, expiry and payload.   
-If expiry is used, it must be UNIX epoch date expressed in seconds, or can be 0 for not using it.                     
-You can custom payload as you but remeber to set aps.alert for displaying message.
+In tokens array come array of tokens in string.
+Messages for sending is array of JSON containing :
+    * _id -> notification id
+    * expiry -> set 0 for not using it or UNIX epoch date expressed in seconds
+    * payload -> data for sending
 
-### Output array looks like this :   
+iOS phone will use this fields from payload :
+    * aps.alert -> notification text; if not set notification will not be shown
+    * aps.sound -> set to 'default' for using
+    * aps.badge -> number
+
+### Result status report
+
 ```
 [ { token: '1.token',
     status: 0,
@@ -61,4 +75,13 @@ You can custom payload as you but remeber to set aps.alert for displaying messag
     status: 8,
     _id: '1asd1231' }]
 ```
-Status is given from apns and _id from incomming notification. 0 is for success.
+Status contains of :
+    * _id -> notification id
+    * token
+    * status -> 0 for success, 7 for too long payload, 8 for invalid token, 9 for invalid notification
+
+
+### The magic
+
+This module doesn't use timeouts or q or anything else similar.
+It uses apns error report for finding last notification sent and thus confirming receiving of all previous one.
