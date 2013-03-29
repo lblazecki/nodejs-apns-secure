@@ -1,0 +1,22 @@
+{
+  "name": "nodejs-apns-secure",
+  "description": "New reliable nodejs library for sending notifications via apns",
+  "version": "1.0.0",
+  "author": "Luka Blažecki <blazecki@gmail.com>",
+  "keywords": ["apple", "push", "apns", "push notifications", "iOS", "notifications"],
+  "main": "index.js",
+  "bugs": {
+      "email": "blazecki@gmail.com",
+      "url": "https://github.com/lblazecki/nodejs-apns-secure/issues"
+   },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lblazecki/nodejs-apns-secure.git"
+  },
+  "dependencies": {
+  	"underscore": "1.4.3"
+  },
+  "engines": { "node": ">= 0.8.16" },
+  "license": "MIT"
+}
+

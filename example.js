@@ -22,7 +22,7 @@ apnsMessage1.payload = apnsMessage2.payload = {
     'messageID' : "1asd1231"
 };
 
-var sender = new (require('./iOSSender')).SenderApns(objectCert, true);
+var sender = new (require('./index')).SenderApns(objectCert, true);
 sender.sendThroughApns([apnsMessage1, apnsMessage2], [token1, token2], function (array) {
     console.log(array);
 }, function (error) {
