@@ -1,16 +1,16 @@
 nodejs-apns-secure
 ==================
 
-New reliable nodejs module for sending notifications via apns.   
-Main advanatages : 
+New reliable nodejs module for sending notifications via apns.
+Main advantages :
 
 * 1. reliable in time <b>status report</b>
 * <b>faster</b> than any other apns module
 * robust
 * bulk messages
 
-Because of current modules that are slow and unreliable I needed to make a new one. After testing and putting this this module in production I wanted to share this module.
-Using this module is very simple :
+Because of current modules that are slow and unreliable I needed to make a new one. After testing and putting this module in production I wanted to share it.
+Using the module is very simple:
 
 ### 1) Create new object with certificates
 
@@ -24,8 +24,7 @@ var objectCert = {
 var sender = new (require('./iOSSender')).SenderApns(objectCert, true);
 ```
 
-In certData comes certificate in string format and in keyData private key.
-For using development mode use false as second argument.
+Enter certificate in “certData” and private key in “keyData”. If using development mode use “false” as second argument.
 
 ### 2) Create notifications and tokens
 
@@ -54,17 +53,17 @@ sender.sendThroughApns(apnsMessages, tokens,
 );
 ```
 
-In tokens array come array of tokens in string.
-Messages for sending is array of JSON containing :
+Enter the tokens in the tokens array.
+Messages for sending are a JSON array containing:
 
     * _id -> notification id
-    * expiry -> set 0 for not using it or UNIX epoch date expressed in seconds
+    * expiry -> set 0 to disable or UNIX epoch date expressed in seconds
     * payload -> data for sending
 
-iOS phone will use this fields from payload :
+iOS phone will use these fields from payload:
 
-    * aps.alert -> notification text; if not set notification will not be shown
-    * aps.sound -> set to 'default' for using
+    * aps.alert -> notification text; if not set the notification will not be shown
+    * aps.sound -> prior to use, set to 'default'
     * aps.badge -> number
 
 ### Result status report
@@ -77,7 +76,7 @@ iOS phone will use this fields from payload :
     status: 8,
     _id: '1asd1231' }]
 ```
-Status contains of :
+The status report contains:
 
     * _id -> notification id
     * token
@@ -86,5 +85,5 @@ Status contains of :
 
 ### The magic
 
-This module doesn't use timeouts or q or anything else similar.
-It uses apns error report for finding last notification sent and thus confirming receiving of all previous one.
+This module doesn't use timeouts or q or anything similar.
+It uses the apns error report for finding the last notification sent and thus confirming the reception of all prior notifications.
