@@ -56,11 +56,13 @@ sender.sendThroughApns(apnsMessages, tokens,
 
 In tokens array come array of tokens in string.
 Messages for sending is array of JSON containing :
+
     * _id -> notification id
     * expiry -> set 0 for not using it or UNIX epoch date expressed in seconds
     * payload -> data for sending
 
 iOS phone will use this fields from payload :
+
     * aps.alert -> notification text; if not set notification will not be shown
     * aps.sound -> set to 'default' for using
     * aps.badge -> number
