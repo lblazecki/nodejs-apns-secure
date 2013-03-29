@@ -45,7 +45,7 @@ var tokens = ["32 length token", "32 length token"];
 var apnsMessages = [apnsMessage1, apnsMessage1];
 ```
 
-### 3) Send notificationsa nd receive result status report
+### 3) Send notificationsa and receive result status report
 
 ```
 sender.sendThroughApns(apnsMessages, tokens,
@@ -78,6 +78,7 @@ iOS phone will use this fields from payload :
     _id: '1asd1231' }]
 ```
 Status contains of :
+
     * _id -> notification id
     * token
     * status -> 0 for success, 7 for too long payload, 8 for invalid token, 9 for invalid notification
