@@ -1,8 +1,8 @@
 {
   "name": "nodejs-apns-secure",
   "description": "New reliable nodejs library for sending notifications via apns",
-  "version": "1.0.0",
-  "author": "Luka Blažecki <blazecki@gmail.com>",
+  "version": "1.0.2",
+  "author": "Luka Blazecki <blazecki@gmail.com>",
   "keywords": ["apple", "push", "apns", "push notifications", "iOS", "notifications"],
   "main": "index.js",
   "bugs": {
