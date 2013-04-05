@@ -1,19 +1,20 @@
 var tls = require('tls');
 var _ = require('underscore');
 
-function SenderApns(objectCert, production) {
+function SenderApns(objectCert, isProduction) {
 
     this.host = 'gateway.push.apple.com';
     this.objectCert = objectCert;
     this.resultArray = [];
     this.callsuccess = null;
-    this.callsuccess = null;
+    this.callerror = null;
     this.notifications = null;
+    this.maxReconnectTry = 6;
     this.reconnectTry = 0;
     this.tokens = [];
     this.tlsStream = null;
 
-    if (!production) {
+    if (!isProduction) {
         this.host = 'gateway.sandbox.push.apple.com';
     }
 }
@@ -30,7 +31,7 @@ SenderApns.prototype.sendThroughApns = function (notifications, tokens, callsucc
     }
 
     //set last notification to fail
-    notifications.push({expiry : 30000, payload : {}, _id : "007"});
+    notifications.push({expiry : 0, payload : {}, _id : "007"});
     tokens.push("aaa111");
 
     self.newConnection(function (tlsStream) {
@@ -81,7 +82,7 @@ SenderApns.prototype.newConnection = function (callsuccess) {
 
     tlsStream.on("data", function (data) {
         self.errorResponse(data);
-    });;
+    });
 };
 
 SenderApns.prototype.errorResponse = function (data) {
@@ -96,7 +97,11 @@ SenderApns.prototype.errorResponse = function (data) {
                 self.resultArray.push({token : token, status : 0, _id : self.notifications[index]._id});
             }
             if (index === identifier && self.tokens.length !== identifier + 1) {
-                self.resultArray.push({token : token, status : apnsError,  _id : self.notifications[index]._id});
+                if (apnsError === 8) {
+                    self.resultArray.push({token : token, status : apnsError,  _id : self.notifications[index]._id, errorType : "InvalidApnsToken"});
+                } else {
+                    self.resultArray.push({token : token, status : apnsError,  _id : self.notifications[index]._id, errorType : "InternalServerError"});
+                }
             }
         });
 
@@ -118,13 +123,21 @@ SenderApns.prototype.reconnect = function () {
 
     var self = this;
     self.reconnectTry += 1;
-    if (self.reconnectTry >= 10) {
+    if (self.reconnectTry >= self.maxReconnectTry) {
+        if (self.resultArray.length > 0) {
+            _.each(self.tokens, function (token, index) {
+                var result = {token : token, status : 10, _id : self.notifications[index]._id, errorType : "Error in connecting with APNS"};
+                self.resultArray.push(result);
+            });
+            self.callsuccess(self.resultArray);
+            return;
+        }
         self.callerror("Error in connecting with APNS");
         return;
     }
     setTimeout(function () {
         self.reSendThroughApns(self.notifications, self.tokens);
-    }, 1000 * self.reconnectTry * self.reconnectTry);
+    }, 500 * self.reconnectTry * self.reconnectTry);
 };
 
 SenderApns.prototype.isInputValid = function () {
@@ -144,13 +157,13 @@ SenderApns.prototype.isInputValid = function () {
 
     var numberNotDeleted = 0;
     _.each(_.clone(self.notifications), function (notification, index) {
-        if (!notification || !notification.payload || !notification._id || isNaN(notification.expiry)) {
-            manageFalseInput(self, index - numberNotDeleted, 9);
+        if (!notification || !notification.payload || !notification._id || isNaN(notification.expiry) || notification.expiry >= 4294967296) {
+            manageFalseInput(self, index - numberNotDeleted, 9, "Invalid notification format");
             numberNotDeleted += 1;
             return;
         }
         if (JSON.stringify(notification.payload).length > 256) {
-            manageFalseInput(self, index - numberNotDeleted, 7);
+            manageFalseInput(self, index - numberNotDeleted, 7, "Apns payload too long");
             numberNotDeleted += 1;
         }
     });
@@ -160,12 +173,12 @@ SenderApns.prototype.isInputValid = function () {
         try {
             var tempToken =  new Buffer(token.replace(/\s/g, ""), "hex");
         } catch (error) {
-            manageFalseInput(self, index - numberTokDeleted, 8);
+            manageFalseInput(self, index - numberTokDeleted, 8, "InvalidApnsToken");
             numberTokDeleted += 1;
             return;
         }
         if (tempToken.length !== 32) {
-            manageFalseInput(self, index - numberTokDeleted, 8);
+            manageFalseInput(self, index - numberTokDeleted, 8, "InvalidApnsToken");
             numberTokDeleted += 1;
         }
     });
@@ -211,8 +224,8 @@ function makeApnsMessage(token, identifier, notification) {
     return apnsMessage;
 }
 
-function manageFalseInput(self, index, status) {
-    self.resultArray.push({token : self.tokens[index], status : status,  _id : self.notifications[index]._id});
+function manageFalseInput(self, index, status, errorType) {
+    self.resultArray.push({token : self.tokens[index], status : status,  _id : self.notifications[index]._id, errorType : errorType});
     self.tokens.splice(index, 1);
     self.notifications.splice(index, 1);
 }

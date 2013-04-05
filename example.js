@@ -22,6 +22,13 @@ apnsMessage1.payload = apnsMessage2.payload = {
     'messageID' : "1asd1231"
 };
 
+var feedback = new (require('./feedback')).FeedBackApns(objectCert, true);
+feedback.checkTokensWithFeedback(function (resultStatusArray) {
+    console.log(resultStatusArray);
+}, function (error) {
+    console.log(error);
+});
+
 var sender = new (require('./index')).SenderApns(objectCert, true);
 sender.sendThroughApns([apnsMessage1, apnsMessage2], [token1, token2], function (array) {
     console.log(array);

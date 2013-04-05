@@ -10,6 +10,12 @@ Main advantages :
 * bulk messages
 
 Because of current modules that are slow and unreliable I needed to make a new one. After testing and putting this module in production I wanted to share it.
+
+### Download
+
+From github or from npm :
+``` npm install nodejs-apns-secure ```
+
 Using the module is very simple:
 
 ### 1) Create new object with certificates
@@ -44,7 +50,7 @@ var tokens = ["32 length token", "32 length token"];
 var apnsMessages = [apnsMessage1, apnsMessage1];
 ```
 
-### 3) Send notificationsa and receive result status report
+### 3) Send notifications and receive result status report
 
 ```
 sender.sendThroughApns(apnsMessages, tokens,
@@ -87,3 +93,32 @@ The status report contains:
 
 This module doesn't use timeouts or q or anything similar.
 It uses the apns error report for finding the last notification sent and thus confirming the reception of all prior notifications.
+
+### Feedback
+
+When having a large list of tokens that aren't filtered (with many invalid ones that will result in delay when sending),
+feedback can help filtering token database.
+
+```
+var certData = "-----BEGIN CERTIFICATE...END CERTIFICATE-----";
+var keyData =  "-----BEGIN RSAPRIVATE KEY...END RSA PRIVATE KEY-----";
+var objectCert = {
+    certData : certData,
+    keyData : keyData
+};
+var feedback = new (require('./feedback')).FeedBackApns(objectCert, true);
+feedback.checkTokensWithFeedback(function (resultStatusArray) {
+    console.log(resultStatusArray);
+}, function (error) {
+    console.log(error);
+});
+```
+
+This function will return array of objects :
+```
+[ { token: '1.token',
+    timeStamp: 1231232},
+  { token: '2.token',
+    timeStamp: 1231232}]
+```
+TimeStamp is date when application had unregistered in UNIX epoch date format
