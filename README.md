@@ -4,10 +4,10 @@ nodejs-apns-secure
 New reliable nodejs module for sending notifications via apns.
 Main advantages :
 
-* first reliable module with in time <b>status report</b>
-* <b>faster</b> than any other apns module
-* robust
-* bulk messages
+* obtaining <b>quick delivery reports</b> after last notification sent
+* a more <b>streamlined</b> sending process plus the ability to send <b>bulk messaging</b>
+* sending robustness
+* simplicity of use
 
 Because of current modules that are slow and unreliable I needed to make a new one. After testing and putting this module in production I wanted to share it.
 
@@ -93,11 +93,12 @@ The status report contains:
 
 This module doesn't use timeouts or q or anything similar.
 It uses the apns error report for finding the last notification sent and thus confirming the reception of all prior notifications.
+It also filters all notifications and tokens prior to sending, speeding up the sending processs.
 
 ### Feedback
 
 When having a large list of tokens that aren't filtered (with many invalid ones that will result in delay when sending),
-feedback can help filtering token database.
+feedback can help filtering valid tokens from database.
 
 ```
 var certData = "-----BEGIN CERTIFICATE...END CERTIFICATE-----";
@@ -114,11 +115,11 @@ feedback.checkTokensWithFeedback(function (resultStatusArray) {
 });
 ```
 
-This function will return array of objects :
+This function will return an array of objects :
 ```
 [ { token: '1.token',
     timeStamp: 1231232},
   { token: '2.token',
     timeStamp: 1231232}]
 ```
-TimeStamp is date when application had unregistered in UNIX epoch date format
+TimeStamp is the date when the application had unregistered in UNIX epoch date format.

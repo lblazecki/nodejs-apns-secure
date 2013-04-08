@@ -96,13 +96,6 @@ SenderApns.prototype.errorResponse = function (data) {
             if (index < identifier) {
                 self.resultArray.push({token : token, status : 0, _id : self.notifications[index]._id});
             }
-            if (index === identifier && self.tokens.length !== identifier + 1) {
-                if (apnsError === 8) {
-                    self.resultArray.push({token : token, status : apnsError,  _id : self.notifications[index]._id, errorType : "InvalidApnsToken"});
-                } else {
-                    self.resultArray.push({token : token, status : apnsError,  _id : self.notifications[index]._id, errorType : "InternalServerError"});
-                }
-            }
         });
 
         if (self.tokens.length === identifier + 1) {
@@ -111,12 +104,21 @@ SenderApns.prototype.errorResponse = function (data) {
             return;
         }
 
-        var tokens = self.tokens.slice(identifier + 1);
-        var notifications = self.notifications.slice(identifier + 1);
+        if (apnsError !== 8) {
+            self.resultArray.push({token : self.tokens[identifier], status : apnsError,  _id : self.notifications[identifier]._id, errorType : "InternalServerError"});
+            var tokens = self.tokens.slice(identifier + 1);
+            var notifications = self.notifications.slice(identifier + 1);
+            self.reSendThroughApns(notifications, tokens);
+            return;
+        }
+
+        self.removeTokenFromSendingArray(self.tokens[identifier], apnsError);
+        var tokens = self.tokens.slice(identifier);
+        var notifications = self.notifications.slice(identifier);
         self.reSendThroughApns(notifications, tokens);
         return;
     }
-    self.reSendThroughApns(notifications, tokens);
+    self.reSendThroughApns(self.notifications, self.tokens);
 };
 
 SenderApns.prototype.reconnect = function () {
@@ -140,6 +142,18 @@ SenderApns.prototype.reconnect = function () {
     }, 500 * self.reconnectTry * self.reconnectTry);
 };
 
+SenderApns.prototype.removeTokenFromSendingArray = function (invalidToken, apnsError) {
+
+    var self = this;
+    var numberNotfDeleted = 0;
+    _.each(_.clone(self.tokens), function (token, index) {
+        if (token === invalidToken) {
+            manageFalseInput(self, index - numberNotfDeleted, apnsError, "InvalidApnsToken");
+            numberNotfDeleted += 1;
+        }
+    });
+};
+
 SenderApns.prototype.isInputValid = function () {
 
     var self = this;
@@ -155,16 +169,16 @@ SenderApns.prototype.isInputValid = function () {
         return false;
     }
 
-    var numberNotDeleted = 0;
+    var numberNotfDeleted = 0;
     _.each(_.clone(self.notifications), function (notification, index) {
         if (!notification || !notification.payload || !notification._id || isNaN(notification.expiry) || notification.expiry >= 4294967296) {
-            manageFalseInput(self, index - numberNotDeleted, 9, "Invalid notification format");
-            numberNotDeleted += 1;
+            manageFalseInput(self, index - numberNotfDeleted, 9, "Invalid notification format");
+            numberNotfDeleted += 1;
             return;
         }
         if (JSON.stringify(notification.payload).length > 256) {
-            manageFalseInput(self, index - numberNotDeleted, 7, "Apns payload too long");
-            numberNotDeleted += 1;
+            manageFalseInput(self, index - numberNotfDeleted, 7, "Apns payload too long");
+            numberNotfDeleted += 1;
         }
     });
 
