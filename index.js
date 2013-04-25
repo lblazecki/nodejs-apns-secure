@@ -100,6 +100,7 @@ SenderApns.prototype.errorResponse = function (data) {
 
         if (self.tokens.length === identifier + 1) {
             self.tlsStream.destroySoon();
+            clearTimeout(self.reconnectTimeout);
             self.callsuccess(self.resultArray);
             return;
         }
@@ -124,6 +125,7 @@ SenderApns.prototype.errorResponse = function (data) {
 SenderApns.prototype.reconnect = function () {
 
     var self = this;
+    clearTimeout(self.reconnectTimeout);
     self.reconnectTry += 1;
     if (self.reconnectTry >= self.maxReconnectTry) {
         if (self.resultArray.length > 0) {
@@ -137,7 +139,8 @@ SenderApns.prototype.reconnect = function () {
         self.callerror("Error in connecting with APNS");
         return;
     }
-    setTimeout(function () {
+    self.reconnectTimeout = setTimeout(function () {
+        if(self.notifications.length <= 1) return;
         self.reSendThroughApns(self.notifications, self.tokens);
     }, 500 * self.reconnectTry * self.reconnectTry);
 };
