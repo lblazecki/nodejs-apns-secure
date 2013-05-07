@@ -18,19 +18,21 @@ From github or from npm :
 
 Using the module is very simple:
 
-### 1) Create new object with certificates
+### 1) Create new object with certificates (mandatory) and passphrase (optionally)
 
 ```
 var certData = "-----BEGIN CERTIFICATE...END CERTIFICATE-----";
 var keyData =  "-----BEGIN RSAPRIVATE KEY...END RSA PRIVATE KEY-----";  
 var objectCert = {
     certData : certData,
-    keyData : keyData
+    keyData : keyData,
+    passphrase : "passphrase"
 };   
 var sender = new (require('./index')).SenderApns(objectCert, true);
 ```
 
-Enter certificate in “certData” and private key in “keyData”. If using development mode use “false” as second argument.
+Enter certificate in “certData”, private key in “keyData” and “passphrase” if it was set while creating certificates.
+If using development mode use “false” as second argument.
 
 ### 2) Create notifications and tokens
 
@@ -55,7 +57,7 @@ var apnsMessages = [apnsMessage1, apnsMessage1];
 ```
 sender.sendThroughApns(apnsMessages, tokens,
          function Success (resultStatusArray) { console.log(resultStatusArray); },
-         function (error) { console.log(error); }
+         function Failed  (error) { console.log(error); }
 );
 ```
 
