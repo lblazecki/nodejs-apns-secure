@@ -43,6 +43,9 @@ FeedBackApns.prototype.newConnection = function () {
         key : self.objectCert.keyData,
         cert : self.objectCert.certData
     };
+    if (self.objectCert.passphrase) {
+        tlsConnectionOptions.passphrase = self.objectCert.passphrase;
+    }
 
     try {
         var tlsStream = tls.connect(tlsConnectionOptions, function () {
