@@ -18,21 +18,44 @@ From github or from npm :
 
 Using the module is very simple:
 
-### 1) Create new object with certificates (mandatory) and passphrase (optionally)
+### 1) Create authObject with information for tls connection and options with information regarding APNS
+See [options] in nodejs tls documentation for <b>authObject</b> : http://nodejs.org/api/tls.html#tls_tls_connect_port_host_options_callback
 
 ```
 var certData = "-----BEGIN CERTIFICATE...END CERTIFICATE-----";
 var keyData =  "-----BEGIN RSAPRIVATE KEY...END RSA PRIVATE KEY-----";  
-var objectCert = {
-    certData : certData,
-    keyData : keyData,
+var authObject = {
+    cert : certData,
+    key : keyData,
     passphrase : "passphrase"
-};   
-var sender = new (require('./index')).SenderApns(objectCert, true);
-```
+};
 
-Enter certificate in “certData”, private key in “keyData” and “passphrase” if it was set while creating certificates.
-If using development mode use “false” as second argument.
+or
+
+var authObject = {
+    pfx : readFromFile('file.p12')
+    passphrase : "passphrase"
+};
+
+var options = {isProduction : true};
+
+var sender = new (require('nodejs-apns-secure'))(authObject, options);
+```
+In <b>options</b> object isProduction should be set to true or false. Other values are not needed.
+
+All fields for <b>options</b> : {
+
+ isProduction : bool, set to true if your certificates are for production, otherwise set to false
+
+ maxReconnectTry : number, how many times to try to reconnect,
+
+ sendingTimeout : number in ms, how many time to wait for 1 connection to resolve itself,
+
+ host : string, you can change host for connecting, do not set this,
+
+ port : string, you can change port for connecting, do not set this,
+
+}
 
 ### 2) Create notifications and tokens
 
@@ -55,9 +78,13 @@ var apnsMessages = [apnsMessage1, apnsMessage1];
 ### 3) Send notifications and receive result status report
 
 ```
-sender.sendThroughApns(apnsMessages, tokens,
-         function Success (resultStatusArray) { console.log(resultStatusArray); },
-         function Failed  (error) { console.log(error); }
+sender.send(apnsMessages, tokens)
+    .then(function (resultStatusArray) {
+        console.log(resultStatusArray);
+    }).catch(function (error) {
+        console.log(error);
+        console.log(error.stack);
+    });
 );
 ```
 
@@ -93,11 +120,11 @@ The status report contains:
 
 ### The magic
 
-This module doesn't use timeouts or q or anything similar.
-It uses the apns error report for finding the last notification sent and thus confirming the reception of all prior notifications.
+This module uses the apns error report for finding the last notification sent and thus confirming the reception of all prior notifications.
+
 It also filters all notifications and tokens prior to sending, speeding up the sending processs.
 
-### Feedback
+### Feedback isn't working now
 
 When having a large list of tokens that aren't filtered (with many invalid ones that will result in delay when sending),
 feedback can help filtering valid tokens from database.

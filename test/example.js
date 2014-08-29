@@ -1,3 +1,4 @@
+var ApnsSender = require('./../index');
 var token1 = "11111a960806fcfa8f4abc73e015b7a730118c783a6dcede5dda9f34e6fe9270";
 var token2 = "11111a960806fcfa8f4abc73e015b7a730118c783a6dcede5dda9f34e6fe9270";
 
@@ -12,8 +13,8 @@ var apnsMessage2 = {
     _id : "1asd1231"
 };
 var objectCert = {
-    certData : certData,
-    keyData : keyData
+    cert : certData,
+    key : keyData
 };
 apnsMessage1.payload = apnsMessage2.payload = {
     'aps': {"badge" : "123", "alert" : "Test it bulk", "sound" : "default"},
@@ -22,16 +23,17 @@ apnsMessage1.payload = apnsMessage2.payload = {
     'messageID' : "1asd1231"
 };
 
-var feedback = new (require('./feedback')).FeedBackApns(objectCert, true);
-feedback.checkTokensWithFeedback(function (resultStatusArray) {
-    console.log(resultStatusArray);
-}, function (error) {
-    console.log(error);
-});
+//var feedback = new (require('./../feedback')).FeedBackApns(objectCert, true);
+//feedback.checkTokensWithFeedback(function (resultStatusArray) {
+//    console.log(resultStatusArray);
+//}, function (error) {
+//    console.log(error);
+//});
 
-var sender = new (require('./index')).SenderApns(objectCert, true);
-sender.sendThroughApns([apnsMessage1, apnsMessage2], [token1, token2], function (array) {
-    console.log(array);
-}, function (error) {
-    console.log(error);
-});
+var apnsSender = new ApnsSender(objectCert, {isProduction : false})
+    .then(function (array) {
+        console.log(array);
+    }).catch(function (error) {
+        console.log(error);
+        console.log(error.stack);
+    });
