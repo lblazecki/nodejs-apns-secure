@@ -124,7 +124,7 @@ This module uses the apns error report for finding the last notification sent an
 
 It also filters all notifications and tokens prior to sending, speeding up the sending processs.
 
-### Feedback isn't working now
+### Feedback isn't updated yet
 
 When having a large list of tokens that aren't filtered (with many invalid ones that will result in delay when sending),
 feedback can help filtering valid tokens from database.
